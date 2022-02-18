@@ -86,7 +86,7 @@ jobs:
                 echo "${{ env.latest_tag }}" > ./.github/workflows/nemo_sha
                 
                 git config --local user.name "jdha"
-                git add ./.github/workflow/nemo_sha
+                git add ./.github/workflows/nemo_sha
                 git commit -m "Updating SHA in nemo_sha"
       - name: Push changes
         uses: ad-m/github-push-action@master
