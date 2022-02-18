@@ -22,7 +22,7 @@ jobs:
       - name: Define Repository Name and Release Version
         run: |
             repo=$(echo "${GITHUB_REPOSITORY/\//-}")
-            release=$(cat ./.github/workflows/nemo_sha)
+            release=$(cat nemo_sha)
             tag_version=$(cat VERSION)
             echo "reponame=$repo" >> $GITHUB_ENV
             echo "release_tag=$release" >> $GITHUB_ENV
@@ -83,10 +83,10 @@ jobs:
                     fi
                 done
                 echo $PWD
-                echo "${{ env.latest_tag }}" > ./.github/workflows/nemo_sha
+                echo "${{ env.latest_tag }}" > nemo_sha
                 
                 git config --local user.name "jdha"
-                git add ./.github/workflows/nemo_sha
+                git add nemo_sha
                 git commit -m "Updating SHA in nemo_sha"
       - name: Push changes
         uses: ad-m/github-push-action@master
