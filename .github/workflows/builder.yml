@@ -82,7 +82,9 @@ jobs:
                         echo "There was an issue building $container."          
                     fi
                 done
-                cat "${{ env.latest_tag }}" > ./.github/workflow/nemo_sha
+                echo $PWD
+                echo "${{ env.latest_tag }}" > ./.github/workflow/nemo_sha
+                
                 git config --local user.name "jdha"
                 git add ./.github/workflow/nemo_sha
                 git commit -m "Updating SHA in nemo_sha"
