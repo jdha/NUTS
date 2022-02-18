@@ -44,8 +44,8 @@ jobs:
       - name: Build the MPICH singularity container
         if: ${{ env.release_tag != env.latest_tag }}
         run: |
-            key=`git ls-remote git@forge.nemo-ocean.eu:nemo/nemo.git main | awk '{ print $1 }'`
-            old_key=`sed -n 1,1p nemo_sha`
+            key=`git ls-remote https://forge.nemo-ocean.eu/nemo/nemo.git main | awk '{ print $1 }'`
+            old_key=`sed -n 1,1p ./.github/workflows/nemo_sha`
             if [[ "$key" != "$old_key" ]]; then
                 echo $key > nemo_sha
                 repo=$(echo "${GITHUB_REPOSITORY/\//-}")
