@@ -16,13 +16,13 @@ jobs:
         run: |
             # Get the latest tag, we won't build if it's the current
             git fetch --tags
-            latest_tag=$(git tag | tail -1)
+            latest_tag=$(git ls-remote https://forge.nemo-ocean.eu/nemo/nemo.git main | awk '{ print $1 }')
             echo "latest_tag=$latest_tag" >> $GITHUB_ENV
 
       - name: Define Repository Name and Release Version
         run: |
             repo=$(echo "${GITHUB_REPOSITORY/\//-}")
-            release=$(cat VERSION)
+            release=$(cat ./.github/workflows/nemo_sha)
             echo "reponame=$repo" >> $GITHUB_ENV
             echo "release_tag=$release" >> $GITHUB_ENV
       - name: Create Release
@@ -32,8 +32,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.release_tag }}
-          release_name: Release ${{ env.release_tag }}
+          tag_name: ${{ env.latest_tag }}
+          release_name: Release ${{ env.latest_tag }}
           draft: false
           prerelease: false
 
@@ -44,10 +44,6 @@ jobs:
       - name: Build the MPICH singularity container
         if: ${{ env.release_tag != env.latest_tag }}
         run: |
-            key=`git ls-remote https://forge.nemo-ocean.eu/nemo/nemo.git main | awk '{ print $1 }'`
-            old_key=`sed -n 1,1p ./.github/workflows/nemo_sha`
-            if [[ "$key" != "$old_key" ]]; then
-                echo $key > nemo_sha
                 repo=$(echo "${GITHUB_REPOSITORY/\//-}")
                 . input_files/NEMO_in
                 # Work out which builds are required
@@ -84,17 +80,10 @@ jobs:
                         echo "There was an issue building $container."          
                     fi
                 done
-            else
-                echo 'No update today'
-            fi
-      - name: Commit files
-        run: |
-          git diff --quiet ./.github/workflow/nemo_sha; changes=$?
-          if [ $changes = 1 ]; then
-              git config --local user.name "jdha"
-              git add ./.github/workflow/nemo_sha
-              git commit -m "Updating SHA in nemo_sha"
-          fi
+                cat "${{ env.latest_tag }}" > ./.github/workflow/nemo_sha
+                git config --local user.name "jdha"
+                git add ./.github/workflow/nemo_sha
+                git commit -m "Updating SHA in nemo_sha"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
