@@ -1,0 +1,9 @@
+name: CoNES_docs
+channels:
+  - conda-forge
+dependencies:
+  - numpydoc
+  - sphinx
+  - sphinx-autosummary-accessors
+  - sphinx_rtd_theme
+  - xarray

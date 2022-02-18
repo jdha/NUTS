@@ -1,0 +1,110 @@
+name: singularity-deploy
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get Latest Tag
+        run: |
+            # Get the latest tag, we won't build if it's the current
+            git fetch --tags
+            latest_tag=$(git tag | tail -1)
+            echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+
+      - name: Define Repository Name and Release Version
+        run: |
+            repo=$(echo "${GITHUB_REPOSITORY/\//-}")
+            release=$(cat VERSION)
+            echo "reponame=$repo" >> $GITHUB_ENV
+            echo "release_tag=$release" >> $GITHUB_ENV
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        if: ${{ env.release_tag != env.latest_tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.release_tag }}
+          release_name: Release ${{ env.release_tag }}
+          draft: false
+          prerelease: false
+
+      - uses: eWaterCycle/setup-singularity@v7
+        if: ${{ env.release_tag != env.latest_tag }}
+        with:
+          singularity-version: 3.8.3
+      - name: Build the MPICH singularity container
+        if: ${{ env.release_tag != env.latest_tag }}
+        run: |
+            key=`git ls-remote git@forge.nemo-ocean.eu:nemo/nemo.git main | awk '{ print $1 }'`
+            old_key=`sed -n 1,1p nemo_sha`
+            if [[ "$key" != "$old_key" ]]; then
+                echo $key > nemo_sha
+                repo=$(echo "${GITHUB_REPOSITORY/\//-}")
+                . input_files/NEMO_in
+                # Work out which builds are required
+                build_arr=()
+                if [ -z "$MPI" ] || [ "$MPI" = "MPICH" ]; then
+                    if [ -z "$COMM" ] || [ "$COMM" = "UCX" ]; then
+                        build_arr+=("mpich_ucx")
+                    fi
+                    if [ -z "$COMM" ] || [ "$COMM" = "OFI" ]; then
+                        build_arr+=("mpich_ofi")
+                    fi
+                fi
+                if [ -z "$MPI" ] || [ "$MPI" = "OMPI" ]; then
+                    if [ -z "$COMM" ] || [ "$COMM" = "UCX" ]; then
+                        build_arr+=("ompi_ucx")
+                    fi
+                    if [ -z "$COMM" ] || [ "$COMM" = "OFI" ]; then
+                        echo "There is no openMPI OFI baseOS yet."          
+                    fi
+                fi
+                # For each build choice, procude a SIF
+                recipe="Singularity.nemo" # if more than one we could use `for recipe in $(ls Singularity*); do`
+                for build in "${build_arr[@]}"; do
+                    echo "Building $build"
+                    # Get the baseOS
+                    wget http://gws-access.ceda.ac.uk/public/jmmp_collab/CoNES/nemo_baseOS_"$build".sif -O nemo_baseOS.sif
+                    # Build the container 
+                    container="$repo:nemo-$build.sif"
+                    singularity build --fakeroot container.sif "$recipe"
+                    if [ "$?" == "0" ]; then
+                        echo "Successfully built container $container."                
+                        mv container.sif "$container"
+                    else
+                        echo "There was an issue building $container."          
+                    fi
+                done
+            else
+                echo 'No update today'
+            fi
+      - name: Commit files
+        run: |
+          git diff --quiet ./.github/workflow/nemo_sha; changes=$?
+          if [ $changes = 1 ]; then
+              git config --local user.name "jdha"
+              git add ./.github/workflow/nemo_sha
+              git commit -m "Updating SHA in nemo_sha"
+          fi
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          force: true
+      - name: Upload Release Assets
+        if: ${{ env.release_tag != env.latest_tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          tag_name: ${{ env.release_tag }}
+        run: |
+          hub release edit $(find . -type f -name "*.sif" -printf "-a %p ") -m "" "$tag_name" 
