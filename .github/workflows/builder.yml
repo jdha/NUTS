@@ -83,7 +83,7 @@ jobs:
                     fi
                 done
                 echo $PWD
-                echo "${{ env.latest_tag }}" > ./.github/workflow/nemo_sha
+                echo "${{ env.latest_tag }}" > ./.github/workflows/nemo_sha
                 
                 git config --local user.name "jdha"
                 git add ./.github/workflow/nemo_sha
