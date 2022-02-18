@@ -95,16 +95,4 @@ cd sette
 
 echo "Compiling SETTE"
 
-./makenemo -m singularity -r NEMO -j 8
-
-cd cfgs/NEMO/EXP00
-
-# Tidy up
-cp $XIOS_DIR/bin/xios_server.exe ./
-rm -rf $XIOS_DIR
-#cp $REPO_DIR/EXP00_GYRE_PISCES/* ./
-# TODO: do we need to add in all the sym links to namelist + xml etc?
-rm nemo
-cp ../BLD/bin/nemo.exe nemo
-rm -rf ../BLD ../WORK
-rm -rf $WORK_DIR/nemo/src
+./sette.sh -cux COMPILE
