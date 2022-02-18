@@ -73,88 +73,8 @@ cd $WORK_DIR
 
 echo "Making sure that the correct modules are loaded"
 
-case "${NEMO_VER}"
-  in
-  4.0.2)   echo "NEMO Version 4.0.2 will be checked out"
-           ;;
-  4.0.3)   echo "NEMO Version 4.0.3 will be checked out"
-           ;;
-  4.0.4)   echo "NEMO Version 4.0.4 will be checked out"
-           ;;
-  4.0.5)   echo "NEMO Version 4.0.5 will be checked out"
-           ;;
-  4.0.6)   echo "NEMO Version 4.0.6 will be checked out"
-           ;;
-  4.0.7)   echo "NEMO Version 4.0.6 will be checked out"
-           ;;
-  trunk)   echo "NEMO trunk will be checked out"
-           ;;
-  *)       echo "NEMO Version not recognised"
-           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6 and trunk"
-           exit 1
-esac
-
-# Checkout the NEMO code from the SVN Paris repository
-echo "Checking out NEMO repository"
-case "${NEMO_VER}"
-  in
-  trunk)   svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk --depth empty nemo
-           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/src --depth infinity nemo/src
-           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/cfgs/SHARED nemo/cfgs/SHARED
-           svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
-           ;;
-  *)       svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER --depth empty nemo
-           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/src --depth infinity nemo/src
-           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/SHARED nemo/cfgs/SHARED
-           svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
-           ;;
-esac
-
-cd nemo
-
-# Now check EXTERNALS revision number before checking out the rest
-for ext_name in mk FCM IOIPSL
-  do
-  ext=`svn propget svn:externals | grep $ext_name | cut -c2-`
-  svn co http://forge.ipsl.jussieu.fr/nemo/svn/$ext
-done
-
-ext=`svn propget svn:externals | grep makenemo | cut -c2-`
-svn export http://forge.ipsl.jussieu.fr/nemo/svn/$ext
-
-mkdir arch
-
-# Setup the directory structure 
-mkdir $WORK_DIR/nemo/cfgs/NEMO
-
-echo $XIOS_DIR
-# Choose an appropriate directory for your XIOS installation
-if [ ! -d "$XIOS_DIR" ]; then
-  mkdir $XIOS_DIR
-fi
-cd $XIOS_DIR
-echo $PWD
-echo "Checking out xios repository"
-case "${NEMO_VER}"
-  in
-  4.0.2)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
-           ;;
-  4.0.3)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
-           ;;
-  4.0.4)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
-           ;;
-  4.0.5)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
-           ;;
-  4.0.6)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
-           ;;
-  4.0.7)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
-           ;;
-  trunk)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
-           ;;
-  *)       echo "NEMO Version not recognised"
-           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6, 4.0.7 and trunk"
-           exit 1
-esac
+git clone -b main  git@forge.nemo-ocean.eu:nemo/nemo.git nemo
+svn checkout  http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk xios
 
 cd xios
 
@@ -171,19 +91,10 @@ export XIOS_DIR=$XIOS_DIR/xios
 cd $WORK_DIR/nemo
 cp /input_files/arch/nemo/arch* ./arch
 
-echo 'NEMO OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
+cd sette
 
-export CONFIG_DIR=$WORK_DIR/nemo/cfgs/NEMO
+echo "Compiling SETTE"
 
-cd $CONFIG_DIR
-tar xvfz /input_files/MY_SRC.tar.gz 
-
-# Need to put case $VERSION HERE
-echo "bld::tool::fppkeys key_mpp_mpi key_nosignedzero key_iomput" >  $CONFIG_DIR/cpp_NEMO.fcm
-
-cd $WORK_DIR/nemo
-
-echo "Compiling nemo AMM7 Config"
 ./makenemo -m singularity -r NEMO -j 8
 
 cd cfgs/NEMO/EXP00
