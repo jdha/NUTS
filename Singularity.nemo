@@ -12,7 +12,6 @@ From: nemo_baseOS.sif
 
 %files
     input_files/NEMO_in /input_files/NEMO_in
-    input_files/MY_SRC.tar.gz /input_files/MY_SRC.tar.gz
     input_files/setup_nemo /input_files/setup_nemo
     input_files/arch/nemo/arch-singularity.fcm /input_files/arch/nemo/arch-singularity.fcm
     input_files/arch/xios/arch-singularity.fcm /input_files/arch/xios/arch-singularity.fcm
