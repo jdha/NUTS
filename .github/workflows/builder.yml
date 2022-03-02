@@ -1,9 +1,11 @@
-name: singularity-deploy
+name: sette-deploy
 
 on:
   push:
     branches:
       - "main"
+  schedule:
+    - cron: "0 * * * *"
 
 jobs:
   release:
