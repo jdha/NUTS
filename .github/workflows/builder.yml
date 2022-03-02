@@ -23,10 +23,10 @@ jobs:
 
       - name: Define Repository Name and Release Version
         run: |
-            repo=$(echo "${GITHUB_REPOSITORY/\//-}")
+            reponam=$(echo "${GITHUB_REPOSITORY/\//-}")
             release=$(cat nemo_sha)
             tag_version=$(cat VERSION)
-            echo "reponame=$repo" >> $GITHUB_ENV
+            echo "reponame=$reponam" >> $GITHUB_ENV
             echo "release_tag=$release" >> $GITHUB_ENV
             echo "tag_version=$tag_version" >> $GITHUB_ENV
       - name: Delete Release
@@ -57,7 +57,7 @@ jobs:
       - name: Build the MPICH singularity container
         if: ${{ env.release_tag != env.latest_tag }}
         run: |
-                repo=$(echo "${GITHUB_REPOSITORY/\//-}")
+                reponam=$(echo "${GITHUB_REPOSITORY/\//-}")
                 . input_files/NEMO_in
                 # Work out which builds are required
                 build_arr=()
@@ -84,7 +84,7 @@ jobs:
                     # Get the baseOS
                     wget http://gws-access.ceda.ac.uk/public/jmmp_collab/CoNES/nemo_baseOS_"$build".sif -O nemo_baseOS.sif
                     # Build the container 
-                    container="$repo:nemo-$build.sif"
+                    container="$reponam:nemo-$build.sif"
                     singularity build --fakeroot container.sif "$recipe"
                     if [ "$?" == "0" ]; then
                         echo "Successfully built container $container."                
