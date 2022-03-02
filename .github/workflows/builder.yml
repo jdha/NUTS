@@ -31,15 +31,13 @@ jobs:
             echo "tag_version=$tag_version" >> $GITHUB_ENV
       - name: Delete Release
         id: delete_release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v4
         if: ${{ env.release_tag != env.latest_tag }}
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            echo context.repo
             const { owner, repo } = context.repo
             const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
-            echo id
             await github.repos.deleteRelease({ owner, repo, release_id: id })
       - name: Create Release
         id: create_release
