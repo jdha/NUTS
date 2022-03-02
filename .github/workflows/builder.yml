@@ -29,6 +29,16 @@ jobs:
             echo "reponame=$repo" >> $GITHUB_ENV
             echo "release_tag=$release" >> $GITHUB_ENV
             echo "tag_version=$tag_version" >> $GITHUB_ENV
+      - name: Delete Release
+        id: delete_release
+        uses: actions/github-script@v6
+        if: ${{ env.release_tag != env.latest_tag }}
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo
+            const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
+            await github.repos.deleteRelease({ owner, repo, release_id: id })
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -40,7 +50,6 @@ jobs:
           release_name: Release ${{ env.tag_version }}
           draft: false
           prerelease: false
-
       - uses: eWaterCycle/setup-singularity@v7
         if: ${{ env.release_tag != env.latest_tag }}
         with:
