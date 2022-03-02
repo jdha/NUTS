@@ -36,8 +36,10 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
+            echo context.repo
             const { owner, repo } = context.repo
             const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
+            echo id
             await github.repos.deleteRelease({ owner, repo, release_id: id })
       - name: Create Release
         id: create_release
@@ -92,6 +94,7 @@ jobs:
                     else
                         echo "There was an issue building $container."          
                     fi
+                    rm nemo_baseOS.sif
                 done
                 echo $PWD
                 echo "${{ env.latest_tag }}" > nemo_sha
