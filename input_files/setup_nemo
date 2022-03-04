@@ -93,6 +93,11 @@ cp /input_files/arch/nemo/arch* ./arch
 
 cd sette
 
-echo "Compiling SETTE"
+mkdir NEMO_VALIDATION
 
+echo "Compiling SETTE"
+mkdir NEMO_VALIDATION
+cp /input_files/param.cfg ./
+mkdir FORCING/SETTE_inputs
+./sette_fetch_inputs.sh
 ./sette.sh -cux COMPILE
