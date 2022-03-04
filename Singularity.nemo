@@ -22,6 +22,7 @@ From: nemo_baseOS.sif
 %post
     
     . /input_files/NEMO_in
+    NEMO_VERSION=4.0.4
 
     WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT
     cd $WORK_DIR
@@ -43,7 +44,7 @@ From: nemo_baseOS.sif
     #mv /nemo/nemo/cfgs/NEMO/EXP00/nemo /opt/nemo/
 
     mkdir /opt/xios
-    mv /nemo/nemo/cfgs/NEMO/EXP00/xios_server.exe /opt/xios/xios
+    mv /nemo/xios/bin/xios_server.exe /opt/xios/xios
 
     # make everything we've built be owned by `nemo` 
     chown -Rv nemo:nemo /opt

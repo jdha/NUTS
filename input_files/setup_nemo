@@ -18,6 +18,7 @@ display_usage() {
    echo
    exit 1
 	} 
+   echo $#
 # if less than three arguments supplied, display usage 
 	if [  $# -le 11 ] 
 	then 
@@ -73,7 +74,7 @@ cd $WORK_DIR
 
 echo "Making sure that the correct modules are loaded"
 
-git clone -b main  git@forge.nemo-ocean.eu:nemo/nemo.git nemo
+git clone -b main https://forge.nemo-ocean.eu/nemo/nemo.git nemo
 svn checkout  http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk xios
 
 cd xios
@@ -96,8 +97,7 @@ cd sette
 mkdir NEMO_VALIDATION
 
 echo "Compiling SETTE"
-mkdir NEMO_VALIDATION
 cp /input_files/param.cfg ./
-mkdir FORCING/SETTE_inputs
-./sette_fetch_inputs.sh
-./sette.sh -cux COMPILE
+mkdir -p FORCING/SETTE_inputs
+#./sette_fetch_inputs.sh
+#./sette.sh -cux COMPILE
