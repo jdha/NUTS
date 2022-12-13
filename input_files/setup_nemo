@@ -78,6 +78,7 @@ git clone -b main https://forge.nemo-ocean.eu/nemo/nemo.git nemo
 svn checkout  http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk@2379 xios
 
 cd xios
+find . -name .svn -execdir svn update -r2379 \;
 
 cp /input_files/arch/xios/arch* ./arch
 
