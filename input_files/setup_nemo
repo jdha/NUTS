@@ -75,7 +75,7 @@ cd $WORK_DIR
 echo "Making sure that the correct modules are loaded"
 
 git clone -b main https://forge.nemo-ocean.eu/nemo/nemo.git nemo
-svn checkout  http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk xios
+svn checkout  http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk@2379 xios
 
 cd xios
 
